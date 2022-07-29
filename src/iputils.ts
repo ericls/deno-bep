@@ -11,7 +11,7 @@ interface PortArray extends Uint8Array {
 }
 
 export function ipv4ToByteArray(ipv4: string): IPV4Array {
-  const arr = new Uint8Array(ipv4.split(".").map(parseInt));
+  const arr = new Uint8Array(ipv4.split(".").map((seg) => parseInt(seg, 10)));
   return arr as IPV4Array;
 }
 
@@ -33,9 +33,11 @@ export function expandIpv6(ipv6: string): string {
   const rightSegments = right.split(":").filter(Boolean);
   const numRem = 8 - (leftSegments.length + rightSegments.length);
   if (numRem === 0) return ipv6;
-  let str = leftSegments.map((i) => i.padStart(4, "0")).join(":") + ":" +
+  let str = leftSegments.map((i) => i.padStart(4, "0")).join(":") +
+    ":" +
     Array.from({ length: numRem }).fill("0000").join(":") +
-    ":" + rightSegments.map((i) => i.padStart(4, "0")).join(":");
+    ":" +
+    rightSegments.map((i) => i.padStart(4, "0")).join(":");
   if (str[0] === ":") {
     str = str.substring(1);
   }
@@ -47,10 +49,12 @@ export function expandIpv6(ipv6: string): string {
 
 export function ipv6ToByteArray(ipv6: string): IPV6Array {
   const arr = new Uint8Array(
-    expandIpv6(ipv6).split(":").flatMap((seg) => {
-      const int = parseInt(seg);
-      return [Math.floor(int / 0x100), int % 0x100];
-    }),
+    expandIpv6(ipv6)
+      .split(":")
+      .flatMap((seg) => {
+        const int = parseInt(seg, 16);
+        return [Math.floor(int / 0x100), int % 0x100];
+      }),
   );
   return arr as IPV6Array;
 }
